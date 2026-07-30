@@ -1,0 +1,79 @@
+name: Build & Release
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: bun install --ignore-scripts
+
+      - name: Patch latest Yandex Music build
+        run: bun start
+        shell: pwsh
+        env:
+          AUTO_OPEN_DEVTOOLS: false
+
+      - name: Get build version
+        id: version
+        shell: pwsh
+        run: |
+          $versions = Get-ChildItem -Path ".versions" -Directory
+          $latest = $versions | Sort-Object Name -Descending | Select-Object -First 1
+          echo "version=$($latest.Name)" >> $env:GITHUB_OUTPUT
+
+      - name: Pack app.asar
+        shell: pwsh
+        run: |
+          bun x asar pack ".versions/${{ steps.version.outputs.version }}/mod" "app.asar"
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $modDir = ".versions/${{ steps.version.outputs.version }}/mod"
+          cd $modDir
+          npm install --ignore-scripts electron-builder
+          npx electron-builder --win --x64
+          cd ../../..
+          Copy-Item "$modDir/dist/*.exe" . -ErrorAction SilentlyContinue
+          Copy-Item "$modDir/dist/*.dmg" . -ErrorAction SilentlyContinue
+        continue-on-error: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: EggMusicMod v${{ steps.version.outputs.version }}
+          body: |
+            🥚 **EggMusicMod v${{ steps.version.outputs.version }}**
+
+            **Вариант 1 — установщик:**
+            Скачай `EggMusicMod Setup x.x.x.exe` и запусти.
+
+            **Вариант 2 — ручная установка (app.asar):**
+            1. Скачай `app.asar`
+            2. Замени файл в `%LOCALAPPDATA%\Programs\YandexMusic\resources\app.asar`
+            3. Хеш можно не менять — мод уже работает
+          files: |
+            app.asar
+            *.exe
+          generate_release_notes: false
