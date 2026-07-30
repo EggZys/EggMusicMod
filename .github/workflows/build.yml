@@ -50,10 +50,7 @@ jobs:
         shell: pwsh
         run: |
           $modDir = ".versions/${{ steps.version.outputs.version }}/mod"
-          cd $modDir
-          npm install --ignore-scripts electron-builder
-          npx electron-builder --win --x64
-          cd ../../..
+          bun x electron-builder --win --x64 --project $modDir
           Copy-Item "$modDir/dist/*.exe" . -ErrorAction SilentlyContinue
           Copy-Item "$modDir/dist/*.dmg" . -ErrorAction SilentlyContinue
         continue-on-error: true
