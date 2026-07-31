@@ -308,5 +308,13 @@ async function decryptYandexAudio(encryptedData, secretKey) {
   return crypto.subtle.decrypt({ name: "AES-CTR", counter, length: 128 }, cryptoKey, encryptedData);
 }
 
+// Мини-плеер — управление через IPC (сам UI живёт в renderer)
+electron.ipcMain.on("yandexMusicMod.miniPlayer.action", (_ev, action) => {
+  const win = electron.BrowserWindow.getAllWindows()[0];
+  if (win && !win.isDestroyed()) {
+    win.webContents.executeJavaScript(`window.__yandexMusicModMiniPlayerAction?.("${action}")`);
+  }
+});
+
 // Discord RPC (из-за того, что main.js не бандлится а просто добавляется в оригинальный index.js, все импорты приходится делать вручную. Строчка ниже просто заменится на содержимое файла src\mod\features\utils\discordRPC.js)
 mod_require("discordRPC");

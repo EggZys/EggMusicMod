@@ -6,6 +6,15 @@ initFetchInterceptor();
 // Инициализация мода на разблокировку плюса
 import "./features/plus-unlocker";
 
+// Инициализация мода режима инкогнито
+import "./features/incognito-mode";
+
+// Инициализация мода текстов песен
+import "./features/lyrics";
+
+// Инициализация мини-плеера
+import "./features/pi-player";
+
 // Инициализация интерфейса мода
 import "./features/ui/index";
 

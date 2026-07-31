@@ -21,6 +21,9 @@ import { ExperimentsToggle } from "@ui/components/experiments-toggle";
 import { ScaleChanger } from "@ui/components/scale-changer";
 import { CustomThemes } from "@ui/components/custom-themes";
 import { NewYearSnowfall, NewYearSnowfallAnimation } from "@ui/components/snowfall-animation";
+import { Incognito } from "@ui/components/incognito";
+import { Lyrics } from "@ui/components/lyrics";
+import { PiPlayer } from "@ui/components/pi-player";
 
 import { Button } from "./components/ui/button";
 
@@ -196,6 +199,10 @@ export default function App() {
             <FontChanger />
             <ScaleChanger />
             <AutoBestQuality />
+
+            <Lyrics />
+            <PiPlayer />
+            <Incognito />
 
             <Settings />
             <Devtools />
